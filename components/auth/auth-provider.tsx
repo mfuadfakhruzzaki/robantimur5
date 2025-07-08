@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { createContext, useContext, useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client-new";
+import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 

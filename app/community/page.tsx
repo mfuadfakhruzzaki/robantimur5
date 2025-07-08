@@ -1,20 +1,19 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import ProtectedRoute from "@/components/auth/protected-route"
-import { useAuth } from "@/components/auth/auth-provider"
-import { createClient } from "@/lib/supabase/client"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useAuth } from "@/components/auth/auth-provider";
+import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,
   Users,
@@ -33,138 +32,145 @@ import {
   CheckCircle,
   UserCheck,
   Settings,
-} from "lucide-react"
+} from "lucide-react";
 
 interface DiscussionGroup {
-  id: string
-  name: string
-  description: string
-  category: string
-  moderator_id: string | null
-  member_count: number
-  post_count: number
-  created_at: string
-  isUserMember?: boolean
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  moderator_id: string | null;
+  member_count: number;
+  post_count: number;
+  created_at: string;
+  isUserMember?: boolean;
 }
 
 interface Post {
-  id: string
-  author_id: string
-  group_id: string | null
-  title: string
-  content: string
-  post_type: string
-  tags: string[]
-  likes_count: number
-  comments_count: number
-  created_at: string
+  id: string;
+  author_id: string;
+  group_id: string | null;
+  title: string;
+  content: string;
+  post_type: string;
+  tags: string[];
+  likes_count: number;
+  comments_count: number;
+  created_at: string;
   profiles: {
-    name: string
-    avatar_url: string | null
-  }
+    name: string;
+    avatar_url: string | null;
+  };
   discussion_groups?: {
-    name: string
-  }
-  isLiked?: boolean
+    name: string;
+  };
+  isLiked?: boolean;
 }
 
 interface Event {
-  id: string
-  title: string
-  description: string | null
-  event_date: string
-  event_time: string
-  location: string
-  event_type: string
-  max_attendees: number | null
-  attendee_count: number
-  created_by: string
-  created_at: string
-  isUserRegistered?: boolean
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  event_time: string;
+  location: string;
+  event_type: string;
+  max_attendees: number | null;
+  attendee_count: number;
+  created_by: string;
+  created_at: string;
+  isUserRegistered?: boolean;
 }
 
 function CommunityPageContent() {
-  const [discussionGroups, setDiscussionGroups] = useState<DiscussionGroup[]>([])
-  const [recentPosts, setRecentPosts] = useState<Post[]>([])
-  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([])
-  const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState("")
-  const [success, setSuccess] = useState("")
+  const [discussionGroups, setDiscussionGroups] = useState<DiscussionGroup[]>(
+    []
+  );
+  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<Event[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Form states
-  const [showNewPostForm, setShowNewPostForm] = useState(false)
-  const [showNewGroupForm, setShowNewGroupForm] = useState(false)
-  const [showNewEventForm, setShowNewEventForm] = useState(false)
-  const [newPostTitle, setNewPostTitle] = useState("")
-  const [newPostContent, setNewPostContent] = useState("")
-  const [newPostType, setNewPostType] = useState("discussion")
-  const [selectedGroup, setSelectedGroup] = useState<string>("")
+  const [showNewPostForm, setShowNewPostForm] = useState(false);
+  const [showNewGroupForm, setShowNewGroupForm] = useState(false);
+  const [showNewEventForm, setShowNewEventForm] = useState(false);
+  const [newPostTitle, setNewPostTitle] = useState("");
+  const [newPostContent, setNewPostContent] = useState("");
+  const [newPostType, setNewPostType] = useState("discussion");
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
 
   // New group form
-  const [newGroupName, setNewGroupName] = useState("")
-  const [newGroupDescription, setNewGroupDescription] = useState("")
-  const [newGroupCategory, setNewGroupCategory] = useState("gizi")
+  const [newGroupName, setNewGroupName] = useState("");
+  const [newGroupDescription, setNewGroupDescription] = useState("");
+  const [newGroupCategory, setNewGroupCategory] = useState("gizi");
 
   // New event form
-  const [newEventTitle, setNewEventTitle] = useState("")
-  const [newEventDescription, setNewEventDescription] = useState("")
-  const [newEventDate, setNewEventDate] = useState("")
-  const [newEventTime, setNewEventTime] = useState("")
-  const [newEventLocation, setNewEventLocation] = useState("")
-  const [newEventType, setNewEventType] = useState("edukasi")
-  const [newEventMaxAttendees, setNewEventMaxAttendees] = useState("")
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventDescription, setNewEventDescription] = useState("");
+  const [newEventDate, setNewEventDate] = useState("");
+  const [newEventTime, setNewEventTime] = useState("");
+  const [newEventLocation, setNewEventLocation] = useState("");
+  const [newEventType, setNewEventType] = useState("edukasi");
+  const [newEventMaxAttendees, setNewEventMaxAttendees] = useState("");
 
-  const { user, isAdmin } = useAuth()
-  const supabase = createClient()
+  const { user, isAdmin } = useAuth();
+  const supabase = createClient();
 
   useEffect(() => {
-    fetchData()
-  }, [user])
+    fetchData();
+  }, [user]);
 
   const fetchData = async () => {
     try {
-      setError("")
+      setError("");
 
       // Fetch discussion groups
       const { data: groups, error: groupsError } = await supabase
         .from("discussion_groups")
         .select("*")
-        .order("member_count", { ascending: false })
+        .order("member_count", { ascending: false });
 
       if (groupsError) {
-        console.error("Error fetching groups:", groupsError)
+        console.error("Error fetching groups:", groupsError);
       } else if (groups) {
         // Check which groups the user is a member of
         if (user) {
           const groupsWithMembership = await Promise.all(
             groups.map(async (group) => {
-              const { data: isMember } = await supabase.rpc("is_user_in_group", {
-                user_id: user.id,
-                group_id: group.id,
-              })
-              return { ...group, isUserMember: isMember }
-            }),
-          )
-          setDiscussionGroups(groupsWithMembership)
+              const { data: isMember } = await supabase.rpc(
+                "is_user_in_group",
+                {
+                  user_id: user.id,
+                  group_id: group.id,
+                }
+              );
+              return { ...group, isUserMember: isMember };
+            })
+          );
+          setDiscussionGroups(groupsWithMembership);
         } else {
-          setDiscussionGroups(groups)
+          setDiscussionGroups(groups);
         }
       }
 
       // Fetch recent posts with author profiles and group names
       const { data: posts, error: postsError } = await supabase
         .from("posts")
-        .select(`
+        .select(
+          `
           *,
           profiles!posts_author_id_fkey(name, avatar_url),
           discussion_groups(name)
-        `)
+        `
+        )
         .order("created_at", { ascending: false })
-        .limit(10)
+        .limit(10);
 
       if (postsError) {
-        console.error("Error fetching posts:", postsError)
+        console.error("Error fetching posts:", postsError);
       } else if (posts) {
         // Check which posts the user has liked
         if (user) {
@@ -175,13 +181,13 @@ function CommunityPageContent() {
                 .select("id")
                 .eq("post_id", post.id)
                 .eq("user_id", user.id)
-                .single()
-              return { ...post, isLiked: !!likes }
-            }),
-          )
-          setRecentPosts(postsWithLikes)
+                .single();
+              return { ...post, isLiked: !!likes };
+            })
+          );
+          setRecentPosts(postsWithLikes);
         } else {
-          setRecentPosts(posts)
+          setRecentPosts(posts);
         }
       }
 
@@ -191,42 +197,45 @@ function CommunityPageContent() {
         .select("*")
         .gte("event_date", new Date().toISOString().split("T")[0])
         .order("event_date", { ascending: true })
-        .limit(6)
+        .limit(6);
 
       if (eventsError) {
-        console.error("Error fetching events:", eventsError)
+        console.error("Error fetching events:", eventsError);
       } else if (events) {
         // Check which events the user is registered for
         if (user) {
           const eventsWithRegistration = await Promise.all(
             events.map(async (event) => {
-              const { data: isRegistered } = await supabase.rpc("is_user_registered_for_event", {
-                user_id: user.id,
-                event_id: event.id,
-              })
-              return { ...event, isUserRegistered: isRegistered }
-            }),
-          )
-          setUpcomingEvents(eventsWithRegistration)
+              const { data: isRegistered } = await supabase.rpc(
+                "is_user_registered_for_event",
+                {
+                  user_id: user.id,
+                  event_id: event.id,
+                }
+              );
+              return { ...event, isUserRegistered: isRegistered };
+            })
+          );
+          setUpcomingEvents(eventsWithRegistration);
         } else {
-          setUpcomingEvents(events)
+          setUpcomingEvents(events);
         }
       }
     } catch (error) {
-      console.error("Error fetching data:", error)
-      setError("Gagal memuat data komunitas")
+      console.error("Error fetching data:", error);
+      setError("Gagal memuat data komunitas");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !newPostTitle.trim() || !newPostContent.trim()) return
+    e.preventDefault();
+    if (!user || !newPostTitle.trim() || !newPostContent.trim()) return;
 
-    setSubmitting(true)
-    setError("")
-    setSuccess("")
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
       const { error: postError } = await supabase.from("posts").insert({
@@ -235,9 +244,9 @@ function CommunityPageContent() {
         title: newPostTitle,
         content: newPostContent,
         post_type: newPostType,
-      })
+      });
 
-      if (postError) throw postError
+      if (postError) throw postError;
 
       // Update user stats
       try {
@@ -245,7 +254,7 @@ function CommunityPageContent() {
           user_id: user.id,
           activity_type: "community_post",
           points: 75,
-        })
+        });
 
         // Log activity
         await supabase.from("activity_log").insert({
@@ -253,41 +262,41 @@ function CommunityPageContent() {
           activity_type: "community_post",
           activity_title: `Memposting: "${newPostTitle}"`,
           points_earned: 75,
-        })
+        });
 
         // Update streak and check badges
-        await supabase.rpc("update_user_streak", { user_id: user.id })
-        await supabase.rpc("check_and_award_badges", { user_id: user.id })
+        await supabase.rpc("update_user_streak", { user_id: user.id });
+        await supabase.rpc("check_and_award_badges", { user_id: user.id });
       } catch (statsError) {
-        console.error("Error updating stats:", statsError)
+        console.error("Error updating stats:", statsError);
         // Don't fail the whole operation for stats errors
       }
 
       // Reset form
-      setNewPostTitle("")
-      setNewPostContent("")
-      setSelectedGroup("")
-      setNewPostType("discussion")
-      setShowNewPostForm(false)
-      setSuccess("Postingan berhasil dibuat!")
+      setNewPostTitle("");
+      setNewPostContent("");
+      setSelectedGroup("");
+      setNewPostType("discussion");
+      setShowNewPostForm(false);
+      setSuccess("Postingan berhasil dibuat!");
 
       // Refresh posts
-      fetchData()
+      fetchData();
     } catch (error: any) {
-      console.error("Error creating post:", error)
-      setError(error.message || "Gagal membuat postingan")
+      console.error("Error creating post:", error);
+      setError(error.message || "Gagal membuat postingan");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleCreateGroup = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !newGroupName.trim() || !newGroupDescription.trim()) return
+    e.preventDefault();
+    if (!user || !newGroupName.trim() || !newGroupDescription.trim()) return;
 
-    setSubmitting(true)
-    setError("")
-    setSuccess("")
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
       const { data, error: groupError } = await supabase
@@ -299,9 +308,9 @@ function CommunityPageContent() {
           moderator_id: user.id,
         })
         .select()
-        .single()
+        .single();
 
-      if (groupError) throw groupError
+      if (groupError) throw groupError;
 
       // Auto-join the creator to the group
       if (data) {
@@ -309,40 +318,47 @@ function CommunityPageContent() {
           await supabase.from("group_members").insert({
             group_id: data.id,
             user_id: user.id,
-          })
+          });
 
           // Update group member count
-          await supabase.rpc("increment_group_members", { group_id: data.id })
+          await supabase.rpc("increment_group_members", { group_id: data.id });
         } catch (memberError) {
-          console.error("Error joining group:", memberError)
+          console.error("Error joining group:", memberError);
           // Don't fail the whole operation
         }
       }
 
       // Reset form
-      setNewGroupName("")
-      setNewGroupDescription("")
-      setNewGroupCategory("gizi")
-      setShowNewGroupForm(false)
-      setSuccess("Grup diskusi berhasil dibuat!")
+      setNewGroupName("");
+      setNewGroupDescription("");
+      setNewGroupCategory("gizi");
+      setShowNewGroupForm(false);
+      setSuccess("Grup diskusi berhasil dibuat!");
 
       // Refresh data
-      fetchData()
+      fetchData();
     } catch (error: any) {
-      console.error("Error creating group:", error)
-      setError(error.message || "Gagal membuat grup diskusi")
+      console.error("Error creating group:", error);
+      setError(error.message || "Gagal membuat grup diskusi");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!user || !newEventTitle.trim() || !newEventDate || !newEventTime || !newEventLocation.trim()) return
+    e.preventDefault();
+    if (
+      !user ||
+      !newEventTitle.trim() ||
+      !newEventDate ||
+      !newEventTime ||
+      !newEventLocation.trim()
+    )
+      return;
 
-    setSubmitting(true)
-    setError("")
-    setSuccess("")
+    setSubmitting(true);
+    setError("");
+    setSuccess("");
 
     try {
       const { error: eventError } = await supabase.from("events").insert({
@@ -352,143 +368,173 @@ function CommunityPageContent() {
         event_time: newEventTime,
         location: newEventLocation,
         event_type: newEventType,
-        max_attendees: newEventMaxAttendees ? Number.parseInt(newEventMaxAttendees) : null,
+        max_attendees: newEventMaxAttendees
+          ? Number.parseInt(newEventMaxAttendees)
+          : null,
         created_by: user.id,
-      })
+      });
 
-      if (eventError) throw eventError
+      if (eventError) throw eventError;
 
       // Reset form
-      setNewEventTitle("")
-      setNewEventDescription("")
-      setNewEventDate("")
-      setNewEventTime("")
-      setNewEventLocation("")
-      setNewEventType("edukasi")
-      setNewEventMaxAttendees("")
-      setShowNewEventForm(false)
-      setSuccess("Acara berhasil dibuat!")
+      setNewEventTitle("");
+      setNewEventDescription("");
+      setNewEventDate("");
+      setNewEventTime("");
+      setNewEventLocation("");
+      setNewEventType("edukasi");
+      setNewEventMaxAttendees("");
+      setShowNewEventForm(false);
+      setSuccess("Acara berhasil dibuat!");
 
       // Refresh data
-      fetchData()
+      fetchData();
     } catch (error: any) {
-      console.error("Error creating event:", error)
-      setError(error.message || "Gagal membuat acara")
+      console.error("Error creating event:", error);
+      setError(error.message || "Gagal membuat acara");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleLikePost = async (postId: string) => {
-    if (!user) return
+    if (!user) return;
 
     try {
-      const post = recentPosts.find((p) => p.id === postId)
-      if (!post) return
+      const post = recentPosts.find((p) => p.id === postId);
+      if (!post) return;
 
       if (post.isLiked) {
         // Unlike
-        await supabase.from("post_likes").delete().eq("post_id", postId).eq("user_id", user.id)
-        await supabase.rpc("decrement_post_likes", { post_id: postId })
+        await supabase
+          .from("post_likes")
+          .delete()
+          .eq("post_id", postId)
+          .eq("user_id", user.id);
+        await supabase.rpc("decrement_post_likes", { post_id: postId });
       } else {
         // Like
-        await supabase.from("post_likes").insert({ post_id: postId, user_id: user.id })
-        await supabase.rpc("increment_post_likes", { post_id: postId })
+        await supabase
+          .from("post_likes")
+          .insert({ post_id: postId, user_id: user.id });
+        await supabase.rpc("increment_post_likes", { post_id: postId });
       }
 
       // Refresh posts
-      fetchData()
+      fetchData();
     } catch (error) {
-      console.error("Error toggling like:", error)
-      setError("Gagal mengubah status like")
+      console.error("Error toggling like:", error);
+      setError("Gagal mengubah status like");
     }
-  }
+  };
 
   const joinGroup = async (groupId: string) => {
-    if (!user) return
+    if (!user) return;
 
     try {
-      await supabase.from("group_members").insert({ group_id: groupId, user_id: user.id })
-      await supabase.rpc("increment_group_members", { group_id: groupId })
-      setSuccess("Berhasil bergabung dengan grup!")
-      fetchData()
+      await supabase
+        .from("group_members")
+        .insert({ group_id: groupId, user_id: user.id });
+      await supabase.rpc("increment_group_members", { group_id: groupId });
+      setSuccess("Berhasil bergabung dengan grup!");
+      fetchData();
     } catch (error: any) {
-      console.error("Error joining group:", error)
+      console.error("Error joining group:", error);
       if (error.code === "23505") {
         // Unique constraint violation
-        setError("Anda sudah menjadi anggota grup ini")
+        setError("Anda sudah menjadi anggota grup ini");
       } else {
-        setError("Gagal bergabung dengan grup")
+        setError("Gagal bergabung dengan grup");
       }
     }
-  }
+  };
 
   const leaveGroup = async (groupId: string) => {
-    if (!user || !confirm("Apakah Anda yakin ingin keluar dari grup ini?")) return
+    if (!user || !confirm("Apakah Anda yakin ingin keluar dari grup ini?"))
+      return;
 
     try {
-      await supabase.from("group_members").delete().eq("group_id", groupId).eq("user_id", user.id)
+      await supabase
+        .from("group_members")
+        .delete()
+        .eq("group_id", groupId)
+        .eq("user_id", user.id);
 
       // Decrement member count
       await supabase
         .from("discussion_groups")
-        .update({ member_count: Math.max(0, discussionGroups.find((g) => g.id === groupId)?.member_count! - 1) })
-        .eq("id", groupId)
+        .update({
+          member_count: Math.max(
+            0,
+            discussionGroups.find((g) => g.id === groupId)?.member_count! - 1
+          ),
+        })
+        .eq("id", groupId);
 
-      setSuccess("Berhasil keluar dari grup!")
-      fetchData()
+      setSuccess("Berhasil keluar dari grup!");
+      fetchData();
     } catch (error) {
-      console.error("Error leaving group:", error)
-      setError("Gagal keluar dari grup")
+      console.error("Error leaving group:", error);
+      setError("Gagal keluar dari grup");
     }
-  }
+  };
 
   const registerForEvent = async (eventId: string) => {
-    if (!user) return
+    if (!user) return;
 
     try {
-      await supabase.from("event_attendees").insert({ event_id: eventId, user_id: user.id })
-      await supabase.rpc("increment_event_attendees", { event_id: eventId })
-      setSuccess("Berhasil mendaftar acara!")
-      fetchData()
+      await supabase
+        .from("event_attendees")
+        .insert({ event_id: eventId, user_id: user.id });
+      await supabase.rpc("increment_event_attendees", { event_id: eventId });
+      setSuccess("Berhasil mendaftar acara!");
+      fetchData();
     } catch (error: any) {
-      console.error("Error registering for event:", error)
+      console.error("Error registering for event:", error);
       if (error.code === "23505") {
-        setError("Anda sudah terdaftar untuk acara ini")
+        setError("Anda sudah terdaftar untuk acara ini");
       } else {
-        setError("Gagal mendaftar acara")
+        setError("Gagal mendaftar acara");
       }
     }
-  }
+  };
 
   const unregisterFromEvent = async (eventId: string) => {
-    if (!user || !confirm("Apakah Anda yakin ingin membatalkan pendaftaran?")) return
+    if (!user || !confirm("Apakah Anda yakin ingin membatalkan pendaftaran?"))
+      return;
 
     try {
-      await supabase.from("event_attendees").delete().eq("event_id", eventId).eq("user_id", user.id)
+      await supabase
+        .from("event_attendees")
+        .delete()
+        .eq("event_id", eventId)
+        .eq("user_id", user.id);
 
       // Decrement attendee count
       await supabase
         .from("events")
         .update({
-          attendee_count: Math.max(0, upcomingEvents.find((e) => e.id === eventId)?.attendee_count! - 1),
+          attendee_count: Math.max(
+            0,
+            upcomingEvents.find((e) => e.id === eventId)?.attendee_count! - 1
+          ),
         })
-        .eq("id", eventId)
+        .eq("id", eventId);
 
-      setSuccess("Pendaftaran berhasil dibatalkan!")
-      fetchData()
+      setSuccess("Pendaftaran berhasil dibatalkan!");
+      fetchData();
     } catch (error) {
-      console.error("Error unregistering from event:", error)
-      setError("Gagal membatalkan pendaftaran")
+      console.error("Error unregistering from event:", error);
+      setError("Gagal membatalkan pendaftaran");
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
       </div>
-    )
+    );
   }
 
   return (
@@ -506,7 +552,9 @@ function CommunityPageContent() {
               </Button>
               <div className="flex items-center space-x-2">
                 <Users className="h-6 w-6 text-pink-500" />
-                <h1 className="text-xl font-bold text-gray-800">Komunitas SehatKeluarga</h1>
+                <h1 className="text-xl font-bold text-gray-800">
+                  Komunitas SehatKeluarga
+                </h1>
               </div>
             </div>
             <div className="flex items-center space-x-2">
@@ -533,7 +581,12 @@ function CommunityPageContent() {
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
             <AlertCircle className="h-5 w-5 text-red-500 mr-2" />
             <span className="text-red-700">{error}</span>
-            <Button variant="ghost" size="sm" onClick={() => setError("")} className="ml-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError("")}
+              className="ml-auto"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -543,7 +596,12 @@ function CommunityPageContent() {
           <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center">
             <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
             <span className="text-green-700">{success}</span>
-            <Button variant="ghost" size="sm" onClick={() => setSuccess("")} className="ml-auto">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSuccess("")}
+              className="ml-auto"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
@@ -562,7 +620,9 @@ function CommunityPageContent() {
             {/* Discussion Groups */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-800">Grup Diskusi</h2>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Grup Diskusi
+                </h2>
                 <Button onClick={() => setShowNewGroupForm(true)} size="sm">
                   <Plus className="h-4 w-4 mr-2" />
                   Buat Grup
@@ -571,13 +631,18 @@ function CommunityPageContent() {
 
               <div className="grid md:grid-cols-3 gap-4 mb-8">
                 {discussionGroups.map((group) => (
-                  <Card key={group.id} className="hover:shadow-lg transition-shadow">
+                  <Card
+                    key={group.id}
+                    className="hover:shadow-lg transition-shadow"
+                  >
                     <CardHeader>
                       <div className="flex items-center justify-between">
                         <CardTitle className="text-lg">{group.name}</CardTitle>
                         <Badge variant="secondary">{group.category}</Badge>
                       </div>
-                      <p className="text-sm text-gray-600">{group.description}</p>
+                      <p className="text-sm text-gray-600">
+                        {group.description}
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
@@ -587,16 +652,28 @@ function CommunityPageContent() {
                         </div>
                         {group.isUserMember ? (
                           <div className="flex items-center space-x-2 mt-3">
-                            <Button variant="outline" size="sm" className="flex-1 bg-transparent">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="flex-1 bg-transparent"
+                            >
                               <UserCheck className="h-4 w-4 mr-2" />
                               Anggota
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => leaveGroup(group.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => leaveGroup(group.id)}
+                            >
                               Keluar
                             </Button>
                           </div>
                         ) : (
-                          <Button className="w-full mt-3" size="sm" onClick={() => joinGroup(group.id)}>
+                          <Button
+                            className="w-full mt-3"
+                            size="sm"
+                            onClick={() => joinGroup(group.id)}
+                          >
                             Gabung Diskusi
                           </Button>
                         )}
@@ -622,7 +699,9 @@ function CommunityPageContent() {
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Avatar>
-                          <AvatarImage src={post.profiles.avatar_url || "/placeholder.svg"} />
+                          <AvatarImage
+                            src={post.profiles.avatar_url || "/placeholder.svg"}
+                          />
                           <AvatarFallback>
                             {post.profiles.name
                               .split(" ")
@@ -632,10 +711,14 @@ function CommunityPageContent() {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-1">
-                            <span className="font-medium">{post.profiles.name}</span>
+                            <span className="font-medium">
+                              {post.profiles.name}
+                            </span>
                             {post.discussion_groups && (
                               <>
-                                <span className="text-sm text-gray-500">di</span>
+                                <span className="text-sm text-gray-500">
+                                  di
+                                </span>
                                 <Badge variant="outline" className="text-xs">
                                   {post.discussion_groups.name}
                                 </Badge>
@@ -648,7 +731,9 @@ function CommunityPageContent() {
                               </Badge>
                             )}
                             <span className="text-sm text-gray-400">
-                              {new Date(post.created_at).toLocaleDateString("id-ID")}
+                              {new Date(post.created_at).toLocaleDateString(
+                                "id-ID"
+                              )}
                             </span>
                           </div>
                           <h4 className="font-semibold mb-2">{post.title}</h4>
@@ -656,7 +741,11 @@ function CommunityPageContent() {
                           {post.tags.length > 0 && (
                             <div className="flex items-center space-x-2 mb-3">
                               {post.tags.map((tag) => (
-                                <Badge key={tag} variant="secondary" className="text-xs">
+                                <Badge
+                                  key={tag}
+                                  variant="secondary"
+                                  className="text-xs"
+                                >
                                   #{tag}
                                 </Badge>
                               ))}
@@ -669,7 +758,11 @@ function CommunityPageContent() {
                               onClick={() => handleLikePost(post.id)}
                               className={post.isLiked ? "text-red-500" : ""}
                             >
-                              <Heart className={`h-4 w-4 mr-1 ${post.isLiked ? "fill-current" : ""}`} />
+                              <Heart
+                                className={`h-4 w-4 mr-1 ${
+                                  post.isLiked ? "fill-current" : ""
+                                }`}
+                              />
                               {post.likes_count}
                             </Button>
                             <Button variant="ghost" size="sm">
@@ -693,7 +786,9 @@ function CommunityPageContent() {
           {/* Events Tab */}
           <TabsContent value="events" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">Acara Mendatang</h2>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Acara Mendatang
+              </h2>
               <Button onClick={() => setShowNewEventForm(true)} size="sm">
                 <Plus className="h-4 w-4 mr-2" />
                 Buat Acara
@@ -702,7 +797,10 @@ function CommunityPageContent() {
 
             <div className="grid md:grid-cols-2 gap-4">
               {upcomingEvents.map((event) => (
-                <Card key={event.id} className="hover:shadow-lg transition-shadow">
+                <Card
+                  key={event.id}
+                  className="hover:shadow-lg transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{event.title}</CardTitle>
@@ -711,8 +809,8 @@ function CommunityPageContent() {
                           event.event_type === "posyandu"
                             ? "default"
                             : event.event_type === "edukasi"
-                              ? "secondary"
-                              : "outline"
+                            ? "secondary"
+                            : "outline"
                         }
                       >
                         {event.event_type}
@@ -723,12 +821,15 @@ function CommunityPageContent() {
                     <div className="space-y-2">
                       <div className="flex items-center text-sm text-gray-600">
                         <Calendar className="h-4 w-4 mr-2" />
-                        {new Date(event.event_date).toLocaleDateString("id-ID", {
-                          weekday: "long",
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })}
+                        {new Date(event.event_date).toLocaleDateString(
+                          "id-ID",
+                          {
+                            weekday: "long",
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          }
+                        )}
                       </div>
                       <div className="flex items-center text-sm text-gray-600">
                         <Clock className="h-4 w-4 mr-2" />
@@ -738,7 +839,11 @@ function CommunityPageContent() {
                         <MapPin className="h-4 w-4 mr-2" />
                         {event.location}
                       </div>
-                      {event.description && <p className="text-sm text-gray-600 mt-2">{event.description}</p>}
+                      {event.description && (
+                        <p className="text-sm text-gray-600 mt-2">
+                          {event.description}
+                        </p>
+                      )}
                       <div className="flex items-center justify-between mt-4">
                         <span className="text-sm text-gray-500">
                           {event.attendee_count} akan hadir
@@ -750,7 +855,11 @@ function CommunityPageContent() {
                               <UserCheck className="h-4 w-4 mr-2" />
                               Terdaftar
                             </Button>
-                            <Button variant="ghost" size="sm" onClick={() => unregisterFromEvent(event.id)}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => unregisterFromEvent(event.id)}
+                            >
                               Batal
                             </Button>
                           </div>
@@ -758,9 +867,14 @@ function CommunityPageContent() {
                           <Button
                             size="sm"
                             onClick={() => registerForEvent(event.id)}
-                            disabled={event.max_attendees ? event.attendee_count >= event.max_attendees : false}
+                            disabled={
+                              event.max_attendees
+                                ? event.attendee_count >= event.max_attendees
+                                : false
+                            }
                           >
-                            {event.max_attendees && event.attendee_count >= event.max_attendees
+                            {event.max_attendees &&
+                            event.attendee_count >= event.max_attendees
                               ? "Penuh"
                               : "Ikut Acara"}
                           </Button>
@@ -783,7 +897,9 @@ function CommunityPageContent() {
                 <CardContent className="p-6 text-center">
                   <MessageCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Buat Postingan</h3>
-                  <p className="text-sm text-gray-600">Bagikan pengalaman, tips, atau ajukan pertanyaan</p>
+                  <p className="text-sm text-gray-600">
+                    Bagikan pengalaman, tips, atau ajukan pertanyaan
+                  </p>
                 </CardContent>
               </Card>
 
@@ -794,7 +910,9 @@ function CommunityPageContent() {
                 <CardContent className="p-6 text-center">
                   <Users className="h-12 w-12 text-green-500 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Buat Grup Diskusi</h3>
-                  <p className="text-sm text-gray-600">Mulai komunitas baru untuk topik tertentu</p>
+                  <p className="text-sm text-gray-600">
+                    Mulai komunitas baru untuk topik tertentu
+                  </p>
                 </CardContent>
               </Card>
 
@@ -805,7 +923,9 @@ function CommunityPageContent() {
                 <CardContent className="p-6 text-center">
                   <Calendar className="h-12 w-12 text-purple-500 mx-auto mb-4" />
                   <h3 className="font-semibold mb-2">Buat Acara</h3>
-                  <p className="text-sm text-gray-600">Organisir kegiatan edukasi atau posyandu</p>
+                  <p className="text-sm text-gray-600">
+                    Organisir kegiatan edukasi atau posyandu
+                  </p>
                 </CardContent>
               </Card>
             </div>
@@ -814,11 +934,13 @@ function CommunityPageContent() {
           {/* Success Stories Tab */}
           <TabsContent value="success-stories" className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-800">Cerita Sukses</h2>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Cerita Sukses
+              </h2>
               <Button
                 onClick={() => {
-                  setNewPostType("success_story")
-                  setShowNewPostForm(true)
+                  setNewPostType("success_story");
+                  setShowNewPostForm(true);
                 }}
                 size="sm"
               >
@@ -835,7 +957,9 @@ function CommunityPageContent() {
                     <CardContent className="p-4">
                       <div className="flex items-start space-x-3">
                         <Avatar>
-                          <AvatarImage src={post.profiles.avatar_url || "/placeholder.svg"} />
+                          <AvatarImage
+                            src={post.profiles.avatar_url || "/placeholder.svg"}
+                          />
                           <AvatarFallback>
                             {post.profiles.name
                               .split(" ")
@@ -845,13 +969,17 @@ function CommunityPageContent() {
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <span className="font-medium">{post.profiles.name}</span>
+                            <span className="font-medium">
+                              {post.profiles.name}
+                            </span>
                             <Badge className="bg-green-500">
                               <Star className="h-3 w-3 mr-1" />
                               Cerita Sukses
                             </Badge>
                             <span className="text-sm text-gray-400">
-                              {new Date(post.created_at).toLocaleDateString("id-ID")}
+                              {new Date(post.created_at).toLocaleDateString(
+                                "id-ID"
+                              )}
                             </span>
                           </div>
                           <h4 className="font-semibold mb-2">{post.title}</h4>
@@ -863,7 +991,11 @@ function CommunityPageContent() {
                               onClick={() => handleLikePost(post.id)}
                               className={post.isLiked ? "text-red-500" : ""}
                             >
-                              <Heart className={`h-4 w-4 mr-1 text-red-500 ${post.isLiked ? "fill-current" : ""}`} />
+                              <Heart
+                                className={`h-4 w-4 mr-1 text-red-500 ${
+                                  post.isLiked ? "fill-current" : ""
+                                }`}
+                              />
                               {post.likes_count}
                             </Button>
                             <Button variant="ghost" size="sm">
@@ -891,9 +1023,15 @@ function CommunityPageContent() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>
-                    {newPostType === "success_story" ? "Bagikan Cerita Sukses" : "Buat Postingan Baru"}
+                    {newPostType === "success_story"
+                      ? "Bagikan Cerita Sukses"
+                      : "Buat Postingan Baru"}
                   </CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowNewPostForm(false)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowNewPostForm(false)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -941,7 +1079,9 @@ function CommunityPageContent() {
                       value={newPostTitle}
                       onChange={(e) => setNewPostTitle(e.target.value)}
                       placeholder={
-                        newPostType === "success_story" ? "Cerita sukses saya tentang..." : "Tulis judul postingan..."
+                        newPostType === "success_story"
+                          ? "Cerita sukses saya tentang..."
+                          : "Tulis judul postingan..."
                       }
                       required
                     />
@@ -964,11 +1104,17 @@ function CommunityPageContent() {
                   </div>
 
                   <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setShowNewPostForm(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowNewPostForm(false)}
+                    >
                       Batal
                     </Button>
                     <Button type="submit" disabled={submitting}>
-                      {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {submitting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Posting
                     </Button>
                   </div>
@@ -985,7 +1131,11 @@ function CommunityPageContent() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Buat Grup Diskusi Baru</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowNewGroupForm(false)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowNewGroupForm(false)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1035,11 +1185,17 @@ function CommunityPageContent() {
                   </div>
 
                   <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setShowNewGroupForm(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowNewGroupForm(false)}
+                    >
                       Batal
                     </Button>
                     <Button type="submit" disabled={submitting}>
-                      {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {submitting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Buat Grup
                     </Button>
                   </div>
@@ -1056,7 +1212,11 @@ function CommunityPageContent() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Buat Acara Baru</CardTitle>
-                  <Button variant="ghost" size="sm" onClick={() => setShowNewEventForm(false)}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowNewEventForm(false)}
+                  >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
@@ -1075,7 +1235,9 @@ function CommunityPageContent() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="event-description">Deskripsi (Opsional)</Label>
+                    <Label htmlFor="event-description">
+                      Deskripsi (Opsional)
+                    </Label>
                     <Textarea
                       id="event-description"
                       value={newEventDescription}
@@ -1136,12 +1298,16 @@ function CommunityPageContent() {
                       </select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="event-max-attendees">Maks. Peserta (Opsional)</Label>
+                      <Label htmlFor="event-max-attendees">
+                        Maks. Peserta (Opsional)
+                      </Label>
                       <Input
                         id="event-max-attendees"
                         type="number"
                         value={newEventMaxAttendees}
-                        onChange={(e) => setNewEventMaxAttendees(e.target.value)}
+                        onChange={(e) =>
+                          setNewEventMaxAttendees(e.target.value)
+                        }
                         placeholder="50"
                         min="1"
                       />
@@ -1149,11 +1315,17 @@ function CommunityPageContent() {
                   </div>
 
                   <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setShowNewEventForm(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowNewEventForm(false)}
+                    >
                       Batal
                     </Button>
                     <Button type="submit" disabled={submitting}>
-                      {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {submitting && (
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      )}
                       Buat Acara
                     </Button>
                   </div>
@@ -1164,13 +1336,9 @@ function CommunityPageContent() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
 export default function CommunityPage() {
-  return (
-    <ProtectedRoute>
-      <CommunityPageContent />
-    </ProtectedRoute>
-  )
+  return <CommunityPageContent />;
 }

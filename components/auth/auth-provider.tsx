@@ -40,10 +40,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session using getUser() instead of getSession()
     const getInitialSession = async () => {
       try {
+        console.log("AuthProvider - Starting getInitialSession");
         const {
           data: { user },
           error,
         } = await supabase.auth.getUser();
+
+        console.log("AuthProvider - getUser result:", {
+          user: user?.email,
+          error,
+        });
 
         if (error) {
           console.error("Error getting user:", error);
@@ -52,13 +58,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (mounted) {
           setUser(user);
           if (user) {
+            console.log("AuthProvider - Fetching profile for user:", user.id);
             await fetchProfile(user.id);
           }
+          console.log("AuthProvider - Setting loading to false");
           setLoading(false);
         }
       } catch (error) {
         console.error("Error in getInitialSession:", error);
         if (mounted) {
+          console.log(
+            "AuthProvider - Error occurred, setting loading to false"
+          );
           setLoading(false);
         }
       }

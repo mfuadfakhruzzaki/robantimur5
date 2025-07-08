@@ -100,12 +100,6 @@ function AdminDashboardContent() {
 
   const supabase = createClient();
 
-  // Langsung load data saat component mount
-  useEffect(() => {
-    console.log("AdminDashboard - Loading data immediately...");
-    fetchDashboardData();
-  }, []);
-
   // Show loading state
   if (loading) {
     return (
@@ -365,6 +359,12 @@ function AdminDashboardContent() {
       setError(error.message || "Gagal mengubah status publikasi");
     }
   };
+
+  // Load data saat component mount
+  useEffect(() => {
+    console.log("AdminDashboard - Loading data immediately...");
+    fetchDashboardData();
+  }, []);
 
   // Hapus semua auth checking - langsung render dashboard
   return (

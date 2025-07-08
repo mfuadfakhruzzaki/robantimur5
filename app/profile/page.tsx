@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 "use client";
 
 import { useState, useEffect } from "react";
@@ -636,6 +635,3 @@ export default function ProfilePage() {
     </ProtectedRoute>
   );
 }
-=======
-export { default } from "./simple-page";
->>>>>>> ad7a53c88427136e1585a543a88119310c868317

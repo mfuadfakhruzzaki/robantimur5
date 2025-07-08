@@ -40,7 +40,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Get initial session
     const getInitialSession = async () => {
-<<<<<<< HEAD
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -48,61 +47,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (session?.user) {
         await fetchProfile(session.user.id);
-=======
-      try {
-        console.log("Getting initial session...");
-
-        // Add timeout to prevent hanging
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error("Session timeout")), 5000);
-        });
-
-        const sessionPromise = supabase.auth.getSession();
-
-        const {
-          data: { session },
-        } = (await Promise.race([sessionPromise, timeoutPromise])) as any;
-
-        if (!mounted) return;
-
-        console.log("Initial session:", session?.user?.id || "No user");
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        }
-      } catch (error) {
-        console.error("Error getting initial session:", error);
-        if (mounted) {
-          setUser(null);
-          setProfile(null);
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
->>>>>>> ad7a53c88427136e1585a543a88119310c868317
       }
-    };
 
-<<<<<<< HEAD
       setLoading(false);
     };
 
-=======
->>>>>>> ad7a53c88427136e1585a543a88119310c868317
     getInitialSession();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-<<<<<<< HEAD
-=======
-      if (!mounted) return;
-
-      console.log("Auth state changed:", event, session?.user?.id);
->>>>>>> ad7a53c88427136e1585a543a88119310c868317
       setUser(session?.user ?? null);
 
       if (session?.user) {
@@ -114,19 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     });
 
-<<<<<<< HEAD
     return () => subscription.unsubscribe();
-=======
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
->>>>>>> ad7a53c88427136e1585a543a88119310c868317
   }, []);
 
   const fetchProfile = async (userId: string) => {
     try {
-<<<<<<< HEAD
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -137,39 +84,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setProfile(data);
     } catch (error) {
       console.error("Error fetching profile:", error);
-=======
-      console.log("Fetching profile for user:", userId);
-
-      // Add timeout to prevent hanging
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("Profile fetch timeout")), 5000);
-      });
-
-      const profilePromise = supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      const { data, error } = (await Promise.race([
-        profilePromise,
-        timeoutPromise,
-      ])) as any;
-
-      if (error) {
-        console.error("Error fetching profile:", error);
-        // Set profile to null to prevent infinite loading
-        setProfile(null);
-        return;
-      }
-
-      console.log("Profile fetched:", data?.name);
-      setProfile(data);
-    } catch (error) {
-      console.error("Error fetching profile:", error);
-      // Set profile to null to prevent infinite loading
-      setProfile(null);
->>>>>>> ad7a53c88427136e1585a543a88119310c868317
     }
   };
 

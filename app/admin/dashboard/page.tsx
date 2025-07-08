@@ -100,49 +100,6 @@ function AdminDashboardContent() {
 
   const supabase = createClient();
 
-  // Show loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-pink-500 mx-auto mb-4" />
-              <p className="text-gray-600 mb-4">Memuat dashboard admin...</p>
-              <p className="text-sm text-gray-500 mb-4">
-                Jika loading terlalu lama, coba refresh halaman
-              </p>
-              <Button
-                onClick={() => window.location.reload()}
-                variant="outline"
-                size="sm"
-              >
-                Refresh Halaman
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-6xl mx-auto p-6">
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-              <p className="text-red-600 mb-4">{error}</p>
-              <Button onClick={() => fetchDashboardData()}>Coba Lagi</Button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   const fetchDashboardData = async () => {
     try {
       console.log("AdminDashboard - Starting fetchDashboardData");
@@ -399,6 +356,14 @@ function AdminDashboardContent() {
 
       {/* Content */}
       <main className="container mx-auto px-4 py-6">
+        {/* Loading indicator */}
+        {loading && (
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-center">
+            <Loader2 className="h-5 w-5 text-blue-500 mr-2 animate-spin" />
+            <span className="text-blue-700">Memuat data dashboard...</span>
+          </div>
+        )}
+
         {/* Success/Error Messages */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">

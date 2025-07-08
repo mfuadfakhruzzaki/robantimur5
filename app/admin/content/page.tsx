@@ -199,36 +199,88 @@ function AdminContentPageContent() {
   };
 
   const handleSaveVideo = async (video: Partial<EducationalVideo>) => {
-    if (!user) return;
+    console.log("Save video called with:", video);
+    console.log("Current user:", user);
+    console.log("Is admin:", isAdmin);
+    console.log("Video has ID?", !!video.id);
+    console.log("Video ID:", video.id);
+
+    if (!user) {
+      alert("Error: User not authenticated");
+      return;
+    }
 
     setSaving(true);
     try {
       if (video.id) {
         // Update existing video
-        const { error } = await supabase
+        console.log("UPDATING video with ID:", video.id);
+        const updateData = {
+          title: video.title,
+          description: video.description,
+          video_url: video.video_url,
+          thumbnail_url: video.thumbnail_url,
+          category: video.category,
+          duration: video.duration,
+          is_featured: video.is_featured,
+          updated_at: new Date().toISOString(),
+        };
+
+        console.log("Video update data:", updateData);
+
+        const { data, error } = await supabase
           .from("educational_videos")
-          .update({
-            ...video,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", video.id);
+          .update(updateData)
+          .eq("id", video.id)
+          .select();
 
         if (error) throw error;
+        console.log("Video update result:", data);
+        alert("Video berhasil diperbarui!");
       } else {
         // Create new video
-        const { error } = await supabase.from("educational_videos").insert({
-          ...video,
+        console.log("CREATING new video");
+        const insertData = {
+          title: video.title,
+          description: video.description,
+          video_url: video.video_url,
+          thumbnail_url: video.thumbnail_url,
+          category: video.category,
+          duration: video.duration,
+          is_featured: video.is_featured,
           created_by: user.id,
-        });
+        };
+
+        console.log("Video insert data:", insertData);
+
+        const { data, error } = await supabase
+          .from("educational_videos")
+          .insert(insertData)
+          .select();
 
         if (error) throw error;
+        console.log("Video insert result:", data);
+        alert("Video berhasil ditambahkan!");
       }
 
       setEditingVideo(null);
       setShowNewVideoForm(false);
       fetchData();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving video:", error);
+
+      // Show detailed error message
+      let errorMessage = "Terjadi kesalahan saat menyimpan video";
+
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+
+      if (error.code) {
+        errorMessage += ` (Code: ${error.code})`;
+      }
+
+      alert(errorMessage);
     } finally {
       setSaving(false);
     }
@@ -431,7 +483,13 @@ function AdminContentPageContent() {
           <TabsContent value="videos" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Video Edukasi</h2>
-              <Button onClick={() => setShowNewVideoForm(true)}>
+              <Button
+                onClick={() => {
+                  console.log("Tambah Video clicked - resetting state");
+                  setEditingVideo(null);
+                  setShowNewVideoForm(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah Video
               </Button>
@@ -467,7 +525,10 @@ function AdminContentPageContent() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => setEditingVideo(video)}
+                          onClick={() => {
+                            console.log("Edit video clicked for:", video.title);
+                            setEditingVideo(video);
+                          }}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -504,9 +565,10 @@ function AdminContentPageContent() {
         {/* Video Edit/Create Form */}
         {(editingVideo || showNewVideoForm) && (
           <VideoForm
-            video={editingVideo}
+            video={editingVideo} // null for new video, object for editing
             onSave={handleSaveVideo}
             onCancel={() => {
+              console.log("Video Cancel clicked - resetting state");
               setEditingVideo(null);
               setShowNewVideoForm(false);
             }}
@@ -771,6 +833,9 @@ function VideoForm({
   onCancel: () => void;
   saving: boolean;
 }) {
+  console.log("VideoForm rendered with video:", video);
+  console.log("Is editing video mode:", !!video);
+
   const [formData, setFormData] = useState({
     title: video?.title || "",
     description: video?.description || "",
@@ -783,10 +848,35 @@ function VideoForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({
-      ...video,
-      ...formData,
-    });
+
+    // Basic validation
+    if (!formData.title.trim()) {
+      alert("Judul video wajib diisi!");
+      return;
+    }
+
+    if (!formData.video_url.trim()) {
+      alert("URL video wajib diisi!");
+      return;
+    }
+
+    // Prepare video data
+    const videoData = {
+      // Only include ID if we're editing existing video
+      ...(video?.id ? { id: video.id } : {}),
+      title: formData.title.trim(),
+      description: formData.description.trim() || null,
+      video_url: formData.video_url.trim(),
+      thumbnail_url: formData.thumbnail_url.trim() || null,
+      category: formData.category,
+      duration: formData.duration.trim() || null,
+      is_featured: formData.is_featured,
+    };
+
+    console.log("Form video prop:", video);
+    console.log("Is editing video:", !!video?.id);
+    console.log("Submitting video data:", videoData);
+    onSave(videoData);
   };
 
   return (

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useSimpleAuth } from "@/components/auth/simple-auth-provider";
+import { useAuth } from "@/components/auth/auth-provider";
 import { createClient } from "@/lib/supabase/client";
 import { Eye, EyeOff, RefreshCw } from "lucide-react";
 
@@ -12,7 +12,7 @@ export default function SimpleDebugInfo() {
   const [isVisible, setIsVisible] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResults, setTestResults] = useState<any>(null);
-  const { user, loading, error } = useSimpleAuth();
+  const { user, loading } = useAuth();
   const supabase = createClient();
 
   const testConnection = async () => {
@@ -82,12 +82,6 @@ export default function SimpleDebugInfo() {
             </Badge>
           </div>
         </div>
-
-        {error && (
-          <div className="text-red-500">
-            <strong>Error:</strong> {error}
-          </div>
-        )}
 
         {user && (
           <div className="space-y-1">

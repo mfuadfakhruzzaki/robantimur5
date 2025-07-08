@@ -2,8 +2,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/components/auth/auth-provider";
-import DebugInfo from "@/components/debug-info";
+import { SimpleAuthProvider } from "@/components/auth/simple-auth-provider";
+import SimpleDebugInfo from "@/components/simple-debug-info";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -31,10 +31,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.ico" />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
+        <SimpleAuthProvider>
           {children}
-          <DebugInfo />
-        </AuthProvider>
+          <SimpleDebugInfo />
+        </SimpleAuthProvider>
       </body>
     </html>
   );

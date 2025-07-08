@@ -54,16 +54,20 @@ export function SimpleAuthProvider({
             );
             setLoading(false);
           }
-        }, 2000);
+        }, 5000); // Extended to 5 seconds
 
+        console.log("SimpleAuthProvider - Getting session...");
         // Get session (simpler than getUser)
         const {
           data: { session },
+          error,
         } = await supabase.auth.getSession();
-        console.log(
-          "SimpleAuthProvider - Session:",
-          session?.user?.email || "none"
-        );
+
+        console.log("SimpleAuthProvider - Session result:", {
+          user: session?.user?.email || "none",
+          error: error?.message || "no error",
+          hasSession: !!session,
+        });
 
         if (mounted) {
           setUser(session?.user || null);
@@ -72,6 +76,7 @@ export function SimpleAuthProvider({
           }
           clearTimeout(initTimeout);
           setLoading(false);
+          console.log("SimpleAuthProvider - Initialization complete");
         }
       } catch (error) {
         console.error("SimpleAuthProvider - Init error:", error);

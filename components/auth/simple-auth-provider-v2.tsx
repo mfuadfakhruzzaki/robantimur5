@@ -25,7 +25,11 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function SimpleAuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,100 +39,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isAdmin = profile?.role === "admin";
 
   useEffect(() => {
-    let mounted = true;
+    console.log("SimpleAuthProvider - Starting initialization");
 
-    // Get initial session using getUser() with fallback to getSession()
-    const getInitialSession = async () => {
+    // Simple initialization without hanging
+    const initialize = async () => {
       try {
-        console.log("AuthProvider - Starting getInitialSession");
-
-        let user = null;
-        let error = null;
-
-        try {
-          // Try getUser() first (more secure)
-          const getUserResult = (await Promise.race([
-            supabase.auth.getUser(),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error("getUser timeout")), 2000)
-            ),
-          ])) as any;
-
-          user = getUserResult.data?.user;
-          error = getUserResult.error;
-          console.log("AuthProvider - getUser success:", {
-            user: user?.email,
-            error,
-          });
-        } catch (getUserError) {
-          console.warn(
-            "AuthProvider - getUser failed, trying getSession:",
-            getUserError
-          );
-
-          // Fallback to getSession() if getUser() fails
-          try {
-            const sessionResult = await supabase.auth.getSession();
-            user = sessionResult.data?.session?.user || null;
-            error = sessionResult.error;
-            console.log("AuthProvider - getSession fallback:", {
-              user: user?.email,
-              error,
-            });
-          } catch (sessionError) {
-            console.error(
-              "AuthProvider - Both getUser and getSession failed:",
-              sessionError
-            );
-            error = sessionError;
-          }
-        }
+        // Just use getSession for now to avoid hanging
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession();
+        console.log(
+          "SimpleAuthProvider - Session:",
+          session?.user?.email || "null"
+        );
 
         if (error) {
-          console.error("Error getting user:", error);
+          console.error("SimpleAuthProvider - Session error:", error);
         }
 
-        if (mounted) {
-          setUser(user);
-          if (user) {
-            console.log("AuthProvider - Fetching profile for user:", user.id);
-            await fetchProfile(user.id);
-          }
-          console.log("AuthProvider - Setting loading to false");
-          setLoading(false);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await fetchProfile(session.user.id);
         }
       } catch (error) {
-        console.error("Error in getInitialSession:", error);
-        if (mounted) {
-          console.log(
-            "AuthProvider - Error occurred, setting loading to false"
-          );
-          setLoading(false);
-        }
+        console.error("SimpleAuthProvider - Initialization error:", error);
+      } finally {
+        console.log("SimpleAuthProvider - Setting loading to false");
+        setLoading(false);
       }
     };
 
-    getInitialSession();
+    initialize();
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (mounted) {
-        setUser(session?.user ?? null);
+      console.log(
+        "SimpleAuthProvider - Auth state changed:",
+        event,
+        session?.user?.email
+      );
+      setUser(session?.user ?? null);
 
-        if (session?.user) {
-          await fetchProfile(session.user.id);
-        } else {
-          setProfile(null);
-        }
-
-        setLoading(false);
+      if (session?.user) {
+        await fetchProfile(session.user.id);
+      } else {
+        setProfile(null);
       }
+
+      setLoading(false);
     });
 
     return () => {
-      mounted = false;
+      console.log("SimpleAuthProvider - Cleanup");
       subscription.unsubscribe();
     };
   }, []);
@@ -161,7 +127,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, name: string) => {
-    // First, try to sign up
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
@@ -174,13 +139,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
-    // Check if email confirmation is disabled (user is immediately confirmed)
     if (data.user && !data.user.email_confirmed_at) {
-      // Email confirmation is required, return flag to show login form
       return { needsLogin: true };
     }
 
-    // User is automatically confirmed, they should be logged in
     return { needsLogin: false };
   };
 
@@ -199,7 +161,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (error) throw error;
 
-    // Refresh profile
     await fetchProfile(user.id);
   };
 

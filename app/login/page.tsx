@@ -24,15 +24,16 @@ export default function LoginPage() {
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (loading) {
-        console.warn("Auth loading timeout - forcing loading to false");
-        setDebugInfo("Auth loading timeout - please refresh page");
+        console.warn("Auth loading timeout - showing login form anyway");
+        setDebugInfo("Auth loading timeout - showing login form");
+        // Force show login form after timeout
       }
-    }, 5000);
+    }, 3000);
 
     return () => clearTimeout(timeout);
   }, [loading]);
 
-  // Show loading while checking auth status
+  // Show loading while checking auth status (with shorter timeout)
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50 flex items-center justify-center">
@@ -40,6 +41,12 @@ export default function LoginPage() {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
           <p className="text-sm text-gray-600">Loading authentication...</p>
           <p className="text-xs text-gray-500 mt-2">{debugInfo}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 text-xs text-blue-500 hover:underline"
+          >
+            Reload page if stuck
+          </button>
         </div>
       </div>
     );

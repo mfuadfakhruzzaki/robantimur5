@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/components/auth/auth-provider";
+// import { SimpleAuthProvider as AuthProvider } from "@/components/auth/simple-auth-provider-v2";
 import SimpleDebugInfo from "@/components/simple-debug-info";
 
 const inter = Inter({ subsets: ["latin"] });

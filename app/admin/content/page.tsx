@@ -592,22 +592,57 @@ function MaterialForm({
   onCancel: () => void;
   saving: boolean;
 }) {
-  console.log("MaterialForm rendered with material:", material);
-  console.log("Is editing mode:", !!material);
-
   const [formData, setFormData] = useState({
-    slug: material?.slug || "",
-    title: material?.title || "",
-    description: material?.description || "",
-    content: material?.content || "",
-    category: material?.category || "gizi",
-    read_time: material?.read_time || "5 menit",
-    topics: material?.topics?.join(", ") || "",
-    video_url: material?.video_url || "",
-    video_title: material?.video_title || "",
-    video_description: material?.video_description || "",
-    is_published: material?.is_published ?? true,
+    slug: "",
+    title: "",
+    description: "",
+    content: "",
+    category: "gizi",
+    read_time: "5 menit",
+    topics: "",
+    video_url: "",
+    video_title: "",
+    video_description: "",
+    is_published: true,
   });
+
+  // Use useEffect to populate form when material changes
+  useEffect(() => {
+    console.log("MaterialForm useEffect triggered with material:", material);
+    console.log("Is editing mode:", !!material);
+
+    if (material) {
+      // Editing existing material
+      setFormData({
+        slug: material.slug || "",
+        title: material.title || "",
+        description: material.description || "",
+        content: material.content || "",
+        category: material.category || "gizi",
+        read_time: material.read_time || "5 menit",
+        topics: material.topics?.join(", ") || "",
+        video_url: material.video_url || "",
+        video_title: material.video_title || "",
+        video_description: material.video_description || "",
+        is_published: material.is_published ?? true,
+      });
+    } else {
+      // Creating new material - reset form
+      setFormData({
+        slug: "",
+        title: "",
+        description: "",
+        content: "",
+        category: "gizi",
+        read_time: "5 menit",
+        topics: "",
+        video_url: "",
+        video_title: "",
+        video_description: "",
+        is_published: true,
+      });
+    }
+  }, [material]); // Only re-run when material prop changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -833,18 +868,45 @@ function VideoForm({
   onCancel: () => void;
   saving: boolean;
 }) {
-  console.log("VideoForm rendered with video:", video);
-  console.log("Is editing video mode:", !!video);
-
   const [formData, setFormData] = useState({
-    title: video?.title || "",
-    description: video?.description || "",
-    video_url: video?.video_url || "",
-    thumbnail_url: video?.thumbnail_url || "",
-    category: video?.category || "gizi",
-    duration: video?.duration || "",
-    is_featured: video?.is_featured || false,
+    title: "",
+    description: "",
+    video_url: "",
+    thumbnail_url: "",
+    category: "gizi",
+    duration: "",
+    is_featured: false,
   });
+
+  // Use useEffect to populate form when video changes
+  useEffect(() => {
+    console.log("VideoForm useEffect triggered with video:", video);
+    console.log("Is editing video mode:", !!video);
+
+    if (video) {
+      // Editing existing video
+      setFormData({
+        title: video.title || "",
+        description: video.description || "",
+        video_url: video.video_url || "",
+        thumbnail_url: video.thumbnail_url || "",
+        category: video.category || "gizi",
+        duration: video.duration || "",
+        is_featured: video.is_featured || false,
+      });
+    } else {
+      // Creating new video - reset form
+      setFormData({
+        title: "",
+        description: "",
+        video_url: "",
+        thumbnail_url: "",
+        category: "gizi",
+        duration: "",
+        is_featured: false,
+      });
+    }
+  }, [video]); // Only re-run when video prop changes
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

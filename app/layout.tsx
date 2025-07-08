@@ -2,7 +2,8 @@ import type React from "react";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/components/auth/auth-provider";
+import { AuthProvider } from "@/components/auth/auth-provider-simple";
+// import { AuthProvider } from "@/components/auth/auth-provider";
 // import { SimpleAuthProvider as AuthProvider } from "@/components/auth/simple-auth-provider-v2";
 import SimpleDebugInfo from "@/components/simple-debug-info";
 

@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { useAuth } from "@/components/auth/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider-simple";
 import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,

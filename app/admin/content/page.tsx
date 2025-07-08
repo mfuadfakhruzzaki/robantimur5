@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProtectedRoute from "@/components/auth/protected-route";
-import { useAuth } from "@/components/auth/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider-simple";
 import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,

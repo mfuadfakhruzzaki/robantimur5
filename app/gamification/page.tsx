@@ -8,7 +8,7 @@ import { Progress } from "@/components/ui/progress";
 import { Badge as UIBadge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth } from "@/components/auth/auth-provider";
+import { useAuth } from "@/components/auth/auth-provider-simple";
 import { createClient } from "@/lib/supabase/client";
 import {
   ArrowLeft,

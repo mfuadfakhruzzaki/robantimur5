@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useAuth } from "./auth-provider";
+import { useAuth } from "./auth-provider-simple";
 import LoginForm from "./login-form";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "../ui/button";

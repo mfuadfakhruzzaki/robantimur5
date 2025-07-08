@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import ProtectedRoute from "@/components/auth/protected-route"
 import { useAuth } from "@/components/auth/auth-provider"
 import { createClient } from "@/lib/supabase/client"
+import { toast } from "@/hooks/use-toast"
 import {
   ArrowLeft,
   Users,
@@ -182,19 +183,35 @@ function AdminDashboardContent() {
 
     setDeleting(postId)
     try {
-      const { data, error } = await supabase.rpc("admin_delete_post", {
-        post_id: postId,
-        admin_user_id: user.id,
-      })
+      // Delete post comments first
+      const { error: commentsError } = await supabase.from("comments").delete().eq("post_id", postId)
 
-      if (error) throw error
-      if (!data) throw new Error("Tidak memiliki izin untuk menghapus postingan")
+      if (commentsError) throw commentsError
+
+      // Delete post likes
+      const { error: likesError } = await supabase.from("post_likes").delete().eq("post_id", postId)
+
+      if (likesError) throw likesError
+
+      // Delete the post
+      const { error: postError } = await supabase.from("posts").delete().eq("id", postId)
+
+      if (postError) throw postError
 
       setSuccess("Postingan berhasil dihapus")
+      toast({
+        title: "Berhasil",
+        description: "Postingan berhasil dihapus",
+      })
       fetchDashboardData()
     } catch (error: any) {
       console.error("Error deleting post:", error)
       setError(error.message || "Gagal menghapus postingan")
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menghapus postingan",
+        variant: "destructive",
+      })
     } finally {
       setDeleting(null)
     }
@@ -205,19 +222,35 @@ function AdminDashboardContent() {
 
     setDeleting(groupId)
     try {
-      const { data, error } = await supabase.rpc("admin_delete_group", {
-        group_id: groupId,
-        admin_user_id: user.id,
-      })
+      // Delete group members first (using correct table name)
+      const { error: membersError } = await supabase.from("group_members").delete().eq("group_id", groupId)
 
-      if (error) throw error
-      if (!data) throw new Error("Tidak memiliki izin untuk menghapus grup")
+      if (membersError) throw membersError
+
+      // Delete group posts
+      const { error: postsError } = await supabase.from("posts").delete().eq("group_id", groupId)
+
+      if (postsError) throw postsError
+
+      // Delete the group
+      const { error: groupError } = await supabase.from("discussion_groups").delete().eq("id", groupId)
+
+      if (groupError) throw groupError
 
       setSuccess("Grup berhasil dihapus")
+      toast({
+        title: "Berhasil",
+        description: "Grup berhasil dihapus",
+      })
       fetchDashboardData()
     } catch (error: any) {
       console.error("Error deleting group:", error)
       setError(error.message || "Gagal menghapus grup")
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menghapus grup",
+        variant: "destructive",
+      })
     } finally {
       setDeleting(null)
     }
@@ -228,19 +261,30 @@ function AdminDashboardContent() {
 
     setDeleting(eventId)
     try {
-      const { data, error } = await supabase.rpc("admin_delete_event", {
-        event_id: eventId,
-        admin_user_id: user.id,
-      })
+      // Delete event attendees first
+      const { error: attendeesError } = await supabase.from("event_attendees").delete().eq("event_id", eventId)
 
-      if (error) throw error
-      if (!data) throw new Error("Tidak memiliki izin untuk menghapus acara")
+      if (attendeesError) throw attendeesError
+
+      // Delete the event
+      const { error: eventError } = await supabase.from("events").delete().eq("id", eventId)
+
+      if (eventError) throw eventError
 
       setSuccess("Acara berhasil dihapus")
+      toast({
+        title: "Berhasil",
+        description: "Acara berhasil dihapus",
+      })
       fetchDashboardData()
     } catch (error: any) {
       console.error("Error deleting event:", error)
       setError(error.message || "Gagal menghapus acara")
+      toast({
+        title: "Error",
+        description: error.message || "Gagal menghapus acara",
+        variant: "destructive",
+      })
     } finally {
       setDeleting(null)
     }
@@ -256,10 +300,19 @@ function AdminDashboardContent() {
       if (error) throw error
 
       setSuccess(`Materi berhasil ${!currentStatus ? "dipublikasikan" : "disembunyikan"}`)
+      toast({
+        title: "Berhasil",
+        description: `Materi berhasil ${!currentStatus ? "dipublikasikan" : "disembunyikan"}`,
+      })
       fetchDashboardData()
     } catch (error: any) {
       console.error("Error updating material:", error)
       setError(error.message || "Gagal mengubah status publikasi")
+      toast({
+        title: "Error",
+        description: error.message || "Gagal mengubah status publikasi",
+        variant: "destructive",
+      })
     }
   }
 

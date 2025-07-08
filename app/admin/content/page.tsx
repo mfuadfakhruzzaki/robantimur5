@@ -1,68 +1,82 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import ProtectedRoute from "@/components/auth/protected-route"
-import { useAuth } from "@/components/auth/auth-provider"
-import { createClient } from "@/lib/supabase/client"
-import { ArrowLeft, Plus, Edit, Trash2, Save, Eye, EyeOff, Video, FileText, Loader2 } from "lucide-react"
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProtectedRoute from "@/components/auth/protected-route";
+import { useAuth } from "@/components/auth/auth-provider";
+import { createClient } from "@/lib/supabase/client";
+import {
+  ArrowLeft,
+  Plus,
+  Edit,
+  Trash2,
+  Save,
+  Eye,
+  EyeOff,
+  Video,
+  FileText,
+  Loader2,
+} from "lucide-react";
 
 interface ContentMaterial {
-  id: string
-  slug: string
-  title: string
-  description: string | null
-  content: string
-  category: string
-  read_time: string | null
-  topics: string[]
-  video_url: string | null
-  video_title: string | null
-  video_description: string | null
-  is_published: boolean
-  created_at: string
+  id: string;
+  slug: string;
+  title: string;
+  description: string | null;
+  content: string;
+  category: string;
+  read_time: string | null;
+  topics: string[];
+  video_url: string | null;
+  video_title: string | null;
+  video_description: string | null;
+  is_published: boolean;
+  created_at: string;
 }
 
 interface EducationalVideo {
-  id: string
-  title: string
-  description: string | null
-  video_url: string
-  thumbnail_url: string | null
-  category: string
-  duration: string | null
-  is_featured: boolean
-  view_count: number
-  created_at: string
+  id: string;
+  title: string;
+  description: string | null;
+  video_url: string;
+  thumbnail_url: string | null;
+  category: string;
+  duration: string | null;
+  is_featured: boolean;
+  view_count: number;
+  created_at: string;
 }
 
 function AdminContentPageContent() {
-  const [materials, setMaterials] = useState<ContentMaterial[]>([])
-  const [videos, setVideos] = useState<EducationalVideo[]>([])
-  const [loading, setLoading] = useState(true)
-  const [editingMaterial, setEditingMaterial] = useState<ContentMaterial | null>(null)
-  const [editingVideo, setEditingVideo] = useState<EducationalVideo | null>(null)
-  const [showNewMaterialForm, setShowNewMaterialForm] = useState(false)
-  const [showNewVideoForm, setShowNewVideoForm] = useState(false)
-  const [saving, setSaving] = useState(false)
+  const [materials, setMaterials] = useState<ContentMaterial[]>([]);
+  const [videos, setVideos] = useState<EducationalVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingMaterial, setEditingMaterial] =
+    useState<ContentMaterial | null>(null);
+  const [editingVideo, setEditingVideo] = useState<EducationalVideo | null>(
+    null
+  );
+  const [showNewMaterialForm, setShowNewMaterialForm] = useState(false);
+  const [showNewVideoForm, setShowNewVideoForm] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const { user, isAdmin } = useAuth()
-  const supabase = createClient()
+  const { user, isAdmin } = useAuth();
+  const supabase = createClient();
 
   useEffect(() => {
     if (isAdmin) {
-      fetchData()
+      fetchData();
     }
-  }, [isAdmin])
+  }, [isAdmin]);
 
   const fetchData = async () => {
     try {
@@ -70,64 +84,88 @@ function AdminContentPageContent() {
       const { data: materialsData } = await supabase
         .from("content_materials")
         .select("*")
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: false });
 
-      if (materialsData) setMaterials(materialsData)
+      if (materialsData) setMaterials(materialsData);
 
       // Fetch all videos
       const { data: videosData } = await supabase
         .from("educational_videos")
         .select("*")
-        .order("created_at", { ascending: false })
+        .order("created_at", { ascending: false });
 
-      if (videosData) setVideos(videosData)
+      if (videosData) setVideos(videosData);
     } catch (error) {
-      console.error("Error fetching data:", error)
+      console.error("Error fetching data:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleSaveMaterial = async (material: Partial<ContentMaterial>) => {
-    if (!user) return
+    console.log("Save material called with:", material);
+    console.log("Current user:", user);
+    console.log("Is admin:", isAdmin);
 
-    setSaving(true)
+    if (!user) {
+      alert("Error: User not authenticated");
+      return;
+    }
+
+    setSaving(true);
     try {
       if (material.id) {
         // Update existing material
+        console.log("Updating material with ID:", material.id);
         const { error } = await supabase
           .from("content_materials")
           .update({
             ...material,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", material.id)
+          .eq("id", material.id);
 
-        if (error) throw error
+        if (error) throw error;
+        alert("Materi berhasil diperbarui!");
       } else {
         // Create new material
+        console.log("Creating new material");
         const { error } = await supabase.from("content_materials").insert({
           ...material,
           created_by: user.id,
-        })
+        });
 
-        if (error) throw error
+        if (error) throw error;
+        alert("Materi berhasil ditambahkan!");
       }
 
-      setEditingMaterial(null)
-      setShowNewMaterialForm(false)
-      fetchData()
-    } catch (error) {
-      console.error("Error saving material:", error)
+      setEditingMaterial(null);
+      setShowNewMaterialForm(false);
+      fetchData();
+    } catch (error: any) {
+      console.error("Error saving material:", error);
+
+      // Show detailed error message
+      let errorMessage = "Terjadi kesalahan saat menyimpan materi";
+
+      if (error.message) {
+        errorMessage += `: ${error.message}`;
+      }
+
+      if (error.code) {
+        errorMessage += ` (Code: ${error.code})`;
+      }
+
+      alert(errorMessage);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleSaveVideo = async (video: Partial<EducationalVideo>) => {
-    if (!user) return
+    if (!user) return;
 
-    setSaving(true)
+    setSaving(true);
     try {
       if (video.id) {
         // Update existing video
@@ -137,78 +175,91 @@ function AdminContentPageContent() {
             ...video,
             updated_at: new Date().toISOString(),
           })
-          .eq("id", video.id)
+          .eq("id", video.id);
 
-        if (error) throw error
+        if (error) throw error;
       } else {
         // Create new video
         const { error } = await supabase.from("educational_videos").insert({
           ...video,
           created_by: user.id,
-        })
+        });
 
-        if (error) throw error
+        if (error) throw error;
       }
 
-      setEditingVideo(null)
-      setShowNewVideoForm(false)
-      fetchData()
+      setEditingVideo(null);
+      setShowNewVideoForm(false);
+      fetchData();
     } catch (error) {
-      console.error("Error saving video:", error)
+      console.error("Error saving video:", error);
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
   const handleDeleteMaterial = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return
+    if (!confirm("Apakah Anda yakin ingin menghapus materi ini?")) return;
 
     try {
-      const { error } = await supabase.from("content_materials").delete().eq("id", id)
+      const { error } = await supabase
+        .from("content_materials")
+        .delete()
+        .eq("id", id);
 
-      if (error) throw error
-      fetchData()
+      if (error) throw error;
+      fetchData();
     } catch (error) {
-      console.error("Error deleting material:", error)
+      console.error("Error deleting material:", error);
     }
-  }
+  };
 
   const handleDeleteVideo = async (id: string) => {
-    if (!confirm("Apakah Anda yakin ingin menghapus video ini?")) return
+    if (!confirm("Apakah Anda yakin ingin menghapus video ini?")) return;
 
     try {
-      const { error } = await supabase.from("educational_videos").delete().eq("id", id)
+      const { error } = await supabase
+        .from("educational_videos")
+        .delete()
+        .eq("id", id);
 
-      if (error) throw error
-      fetchData()
+      if (error) throw error;
+      fetchData();
     } catch (error) {
-      console.error("Error deleting video:", error)
+      console.error("Error deleting video:", error);
     }
-  }
+  };
 
   const togglePublishStatus = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase.from("content_materials").update({ is_published: !currentStatus }).eq("id", id)
+      const { error } = await supabase
+        .from("content_materials")
+        .update({ is_published: !currentStatus })
+        .eq("id", id);
 
-      if (error) throw error
-      fetchData()
+      if (error) throw error;
+      fetchData();
     } catch (error) {
-      console.error("Error updating publish status:", error)
+      console.error("Error updating publish status:", error);
     }
-  }
+  };
 
   if (!isAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Akses Ditolak</h2>
-          <p className="text-gray-600 mb-4">Anda tidak memiliki izin untuk mengakses halaman admin.</p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            Akses Ditolak
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Anda tidak memiliki izin untuk mengakses halaman admin.
+          </p>
           <Button asChild>
             <Link href="/">Kembali ke Beranda</Link>
           </Button>
         </div>
       </div>
-    )
+    );
   }
 
   if (loading) {
@@ -216,7 +267,7 @@ function AdminContentPageContent() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
       </div>
-    )
+    );
   }
 
   return (
@@ -232,7 +283,9 @@ function AdminContentPageContent() {
                   Kembali ke Materi
                 </Link>
               </Button>
-              <h1 className="text-2xl font-bold text-gray-800">Kelola Konten</h1>
+              <h1 className="text-2xl font-bold text-gray-800">
+                Kelola Konten
+              </h1>
             </div>
           </div>
         </div>
@@ -271,29 +324,57 @@ function AdminContentPageContent() {
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-2">
                           <h3 className="font-semibold">{material.title}</h3>
-                          <Badge variant={material.is_published ? "default" : "secondary"}>
+                          <Badge
+                            variant={
+                              material.is_published ? "default" : "secondary"
+                            }
+                          >
                             {material.is_published ? "Published" : "Draft"}
                           </Badge>
                           <Badge variant="outline">{material.category}</Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{material.description}</p>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {material.description}
+                        </p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
                           <span>Slug: {material.slug}</span>
-                          <span>Dibuat: {new Date(material.created_at).toLocaleDateString("id-ID")}</span>
+                          <span>
+                            Dibuat:{" "}
+                            {new Date(material.created_at).toLocaleDateString(
+                              "id-ID"
+                            )}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => togglePublishStatus(material.id, material.is_published)}
+                          onClick={() =>
+                            togglePublishStatus(
+                              material.id,
+                              material.is_published
+                            )
+                          }
                         >
-                          {material.is_published ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {material.is_published ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => setEditingMaterial(material)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingMaterial(material)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteMaterial(material.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteMaterial(material.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -326,18 +407,33 @@ function AdminContentPageContent() {
                           {video.is_featured && <Badge>Featured</Badge>}
                           <Badge variant="outline">{video.category}</Badge>
                         </div>
-                        <p className="text-sm text-gray-600 mb-2">{video.description}</p>
+                        <p className="text-sm text-gray-600 mb-2">
+                          {video.description}
+                        </p>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
                           <span>Durasi: {video.duration || "N/A"}</span>
                           <span>Views: {video.view_count}</span>
-                          <span>Dibuat: {new Date(video.created_at).toLocaleDateString("id-ID")}</span>
+                          <span>
+                            Dibuat:{" "}
+                            {new Date(video.created_at).toLocaleDateString(
+                              "id-ID"
+                            )}
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" onClick={() => setEditingVideo(video)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingVideo(video)}
+                        >
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDeleteVideo(video.id)}>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteVideo(video.id)}
+                        >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
@@ -355,8 +451,8 @@ function AdminContentPageContent() {
             material={editingMaterial}
             onSave={handleSaveMaterial}
             onCancel={() => {
-              setEditingMaterial(null)
-              setShowNewMaterialForm(false)
+              setEditingMaterial(null);
+              setShowNewMaterialForm(false);
             }}
             saving={saving}
           />
@@ -368,15 +464,15 @@ function AdminContentPageContent() {
             video={editingVideo}
             onSave={handleSaveVideo}
             onCancel={() => {
-              setEditingVideo(null)
-              setShowNewVideoForm(false)
+              setEditingVideo(null);
+              setShowNewVideoForm(false);
             }}
             saving={saving}
           />
         )}
       </main>
     </div>
-  )
+  );
 }
 
 // Material Form Component
@@ -386,10 +482,10 @@ function MaterialForm({
   onCancel,
   saving,
 }: {
-  material: ContentMaterial | null
-  onSave: (material: Partial<ContentMaterial>) => void
-  onCancel: () => void
-  saving: boolean
+  material: ContentMaterial | null;
+  onSave: (material: Partial<ContentMaterial>) => void;
+  onCancel: () => void;
+  saving: boolean;
 }) {
   const [formData, setFormData] = useState({
     slug: material?.slug || "",
@@ -403,25 +499,47 @@ function MaterialForm({
     video_title: material?.video_title || "",
     video_description: material?.video_description || "",
     is_published: material?.is_published ?? true,
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave({
+    e.preventDefault();
+
+    // Basic validation
+    if (!formData.title.trim()) {
+      alert("Judul wajib diisi!");
+      return;
+    }
+
+    if (!formData.slug.trim()) {
+      alert("Slug wajib diisi!");
+      return;
+    }
+
+    if (!formData.content.trim()) {
+      alert("Konten wajib diisi!");
+      return;
+    }
+
+    const materialData = {
       ...material,
       ...formData,
       topics: formData.topics
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
-    })
-  }
+    };
+
+    console.log("Submitting material data:", materialData);
+    onSave(materialData);
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <CardHeader>
-          <CardTitle>{material ? "Edit Materi" : "Tambah Materi Baru"}</CardTitle>
+          <CardTitle>
+            {material ? "Edit Materi" : "Tambah Materi Baru"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -431,7 +549,9 @@ function MaterialForm({
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -440,7 +560,9 @@ function MaterialForm({
                 <Input
                   id="slug"
                   value={formData.slug}
-                  onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, slug: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -451,7 +573,9 @@ function MaterialForm({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={2}
               />
             </div>
@@ -462,7 +586,9 @@ function MaterialForm({
                 <select
                   id="category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                   className="w-full p-2 border border-gray-300 rounded-md"
                 >
                   <option value="gizi">Gizi</option>
@@ -475,7 +601,9 @@ function MaterialForm({
                 <Input
                   id="read_time"
                   value={formData.read_time}
-                  onChange={(e) => setFormData({ ...formData, read_time: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, read_time: e.target.value })
+                  }
                 />
               </div>
               <div className="flex items-center space-x-2">
@@ -483,7 +611,9 @@ function MaterialForm({
                   type="checkbox"
                   id="is_published"
                   checked={formData.is_published}
-                  onChange={(e) => setFormData({ ...formData, is_published: e.target.checked })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, is_published: e.target.checked })
+                  }
                 />
                 <Label htmlFor="is_published">Publikasikan</Label>
               </div>
@@ -494,7 +624,9 @@ function MaterialForm({
               <Input
                 id="topics"
                 value={formData.topics}
-                onChange={(e) => setFormData({ ...formData, topics: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, topics: e.target.value })
+                }
                 placeholder="Topik 1, Topik 2, Topik 3"
               />
             </div>
@@ -504,7 +636,9 @@ function MaterialForm({
               <Textarea
                 id="content"
                 value={formData.content}
-                onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: e.target.value })
+                }
                 rows={10}
                 required
               />
@@ -516,7 +650,9 @@ function MaterialForm({
                 <Input
                   id="video_url"
                   value={formData.video_url}
-                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, video_url: e.target.value })
+                  }
                   placeholder="https://youtube.com/watch?v=..."
                 />
               </div>
@@ -525,7 +661,9 @@ function MaterialForm({
                 <Input
                   id="video_title"
                   value={formData.video_title}
-                  onChange={(e) => setFormData({ ...formData, video_title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, video_title: e.target.value })
+                  }
                 />
               </div>
             </div>
@@ -535,7 +673,12 @@ function MaterialForm({
               <Textarea
                 id="video_description"
                 value={formData.video_description}
-                onChange={(e) => setFormData({ ...formData, video_description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    video_description: e.target.value,
+                  })
+                }
                 rows={2}
               />
             </div>
@@ -554,7 +697,7 @@ function MaterialForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // Video Form Component
@@ -564,10 +707,10 @@ function VideoForm({
   onCancel,
   saving,
 }: {
-  video: EducationalVideo | null
-  onSave: (video: Partial<EducationalVideo>) => void
-  onCancel: () => void
-  saving: boolean
+  video: EducationalVideo | null;
+  onSave: (video: Partial<EducationalVideo>) => void;
+  onCancel: () => void;
+  saving: boolean;
 }) {
   const [formData, setFormData] = useState({
     title: video?.title || "",
@@ -577,15 +720,15 @@ function VideoForm({
     category: video?.category || "gizi",
     duration: video?.duration || "",
     is_featured: video?.is_featured || false,
-  })
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     onSave({
       ...video,
       ...formData,
-    })
-  }
+    });
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -600,7 +743,9 @@ function VideoForm({
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, title: e.target.value })
+                }
                 required
               />
             </div>
@@ -610,7 +755,9 @@ function VideoForm({
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 rows={3}
               />
             </div>
@@ -620,7 +767,9 @@ function VideoForm({
               <Input
                 id="video_url"
                 value={formData.video_url}
-                onChange={(e) => setFormData({ ...formData, video_url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, video_url: e.target.value })
+                }
                 placeholder="https://youtube.com/watch?v=..."
                 required
               />
@@ -631,7 +780,9 @@ function VideoForm({
               <Input
                 id="thumbnail_url"
                 value={formData.thumbnail_url}
-                onChange={(e) => setFormData({ ...formData, thumbnail_url: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, thumbnail_url: e.target.value })
+                }
                 placeholder="https://example.com/thumbnail.jpg"
               />
             </div>
@@ -642,7 +793,9 @@ function VideoForm({
                 <select
                   id="category"
                   value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
                   className="w-full p-2 border border-gray-300 rounded-md"
                 >
                   <option value="gizi">Gizi</option>
@@ -655,7 +808,9 @@ function VideoForm({
                 <Input
                   id="duration"
                   value={formData.duration}
-                  onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, duration: e.target.value })
+                  }
                   placeholder="5:30"
                 />
               </div>
@@ -666,7 +821,9 @@ function VideoForm({
                 type="checkbox"
                 id="is_featured"
                 checked={formData.is_featured}
-                onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, is_featured: e.target.checked })
+                }
               />
               <Label htmlFor="is_featured">Video Unggulan</Label>
             </div>
@@ -685,7 +842,7 @@ function VideoForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 export default function AdminContentPage() {
@@ -693,5 +850,5 @@ export default function AdminContentPage() {
     <ProtectedRoute>
       <AdminContentPageContent />
     </ProtectedRoute>
-  )
+  );
 }

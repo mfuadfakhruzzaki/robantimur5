@@ -14,7 +14,7 @@ Platform edukasi kesehatan untuk ibu-ibu muda di wilayah Roban Timur, Batang den
 
 - **Frontend**: Next.js 15, React 19, TypeScript
 - **Styling**: Tailwind CSS, Shadcn/UI
-- **AI**: Gemini 1.5 Flash API (simulasi untuk development)
+- **AI**: Gemini 1.5 Flash API (terintegrasi dengan konfigurasi API key)
 - **Deployment**: Vercel
 - **Icons**: Lucide React
 
@@ -23,75 +23,86 @@ Platform edukasi kesehatan untuk ibu-ibu muda di wilayah Roban Timur, Batang den
 1. **Clone repository**
    \`\`\`bash
    git clone <repository-url>
-   cd web-edukasi-kkn
+   cd robantimur5
    \`\`\`
 
 2. **Install dependencies**
    \`\`\`bash
-   npm install
+   pnpm install
    \`\`\`
 
 3. **Setup environment variables**
    \`\`\`bash
-   cp .env.local.example .env.local
-   # Edit .env.local dan tambahkan GEMINI_API_KEY jika tersedia
+   cp .env.example .env.local
+
+   # Edit .env.local dan tambahkan API keys yang diperlukan
+
    \`\`\`
 
-4. **Jalankan development server**
+4. **Konfigurasi API Keys**
+
+   - Dapatkan Gemini API key dari: https://makersuite.google.com/app/apikey
+   - Tambahkan ke file `.env.local`:
+     \`\`\`
+     GEMINI_API_KEY=your_gemini_api_key_here
+     \`\`\`
+
+5. **Jalankan development server**
    \`\`\`bash
-   npm run dev
+   pnpm dev
    \`\`\`
 
-5. **Buka browser** dan akses `http://localhost:3000`
+6. **Buka browser** dan akses `http://localhost:3000`
 
 ## 📱 Struktur Aplikasi
 
 \`\`\`
 /web-edukasi-kkn
 ├── app/
-│   ├── page.tsx              # Landing page
-│   ├── materi/
-│   │   ├── page.tsx          # Daftar materi
-│   │   └── [slug]/page.tsx   # Detail materi
-│   ├── chatbot/page.tsx      # Interface chatbot
-│   ├── kontak/page.tsx       # Kontak & info penting
-│   └── api/chat/route.ts     # API endpoint chatbot
-├── components/ui/            # Komponen UI Shadcn
+│ ├── page.tsx # Landing page
+│ ├── materi/
+│ │ ├── page.tsx # Daftar materi
+│ │ └── [slug]/page.tsx # Detail materi
+│ ├── chatbot/page.tsx # Interface chatbot
+│ ├── kontak/page.tsx # Kontak & info penting
+│ └── api/chat/route.ts # API endpoint chatbot
+├── components/ui/ # Komponen UI Shadcn
 ├── lib/
-│   └── gemini.ts            # Handler Gemini API
-└── public/                  # Asset statis
+│ └── gemini.ts # Handler Gemini API
+└── public/ # Asset statis
 \`\`\`
 
 ## 🤖 Integrasi Gemini AI
 
-Aplikasi ini menggunakan simulasi respons AI untuk development. Untuk menggunakan Gemini API yang sesungguhnya:
+Aplikasi ini sudah terintegrasi dengan Gemini 1.5 Flash API. Untuk menggunakan chatbot AI:
 
 1. Dapatkan API key dari [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. Tambahkan ke `.env.local`:
    \`\`\`
    GEMINI_API_KEY=your_api_key_here
    \`\`\`
-3. Uncomment kode di `lib/gemini.ts`
-4. Install package Gemini:
-   \`\`\`bash
-   npm install @google/generative-ai
-   \`\`\`
+3. Chatbot akan secara otomatis berfungsi setelah API key dikonfigurasi
+
+**Catatan**: Tanpa API key, chatbot akan menampilkan pesan error yang meminta konfigurasi.
 
 ## 📋 Konten Materi
 
 ### 1. Gizi Keluarga
+
 - Menu 4 Sehat 5 Sempurna
 - Tips gizi balita
 - Makanan bergizi dengan budget terbatas
 - Menu seminggu keluarga sehat
 
 ### 2. Kesehatan Gigi
+
 - Cara sikat gigi yang benar
 - Perawatan gigi anak
 - Makanan baik dan buruk untuk gigi
 - Pencegahan gigi berlubang
 
 ### 3. Sanitasi Keluarga
+
 - Cuci tangan 6 langkah WHO
 - Kebersihan dapur dan makanan
 - Pengelolaan sampah
@@ -108,6 +119,7 @@ Aplikasi ini menggunakan simulasi respons AI untuk development. Untuk menggunaka
 ## 📞 Kontak Support
 
 Untuk pertanyaan teknis atau saran pengembangan:
+
 - Email: [email-kkn@example.com]
 - WhatsApp: [nomor-koordinator]
 

@@ -126,13 +126,19 @@ export function SimpleAuthProvider({
         .single();
 
       if (error) {
-        console.error("Profile fetch error:", error);
+        console.error("SimpleAuthProvider - Profile fetch error:", error);
         return;
       }
 
+      console.log("SimpleAuthProvider - Profile fetched successfully:", {
+        id: data.id,
+        email: data.email,
+        role: data.role,
+        name: data.name,
+      });
       setProfile(data);
     } catch (error) {
-      console.error("Profile fetch failed:", error);
+      console.error("SimpleAuthProvider - Profile fetch failed:", error);
     }
   };
 

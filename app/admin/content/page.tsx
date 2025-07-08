@@ -136,14 +136,46 @@ function AdminContentPageContent() {
 
         console.log("Update data:", updateData);
 
-        const { data, error } = await supabase
+        // Add timeout to prevent hanging
+        const updatePromise = supabase
           .from("content_materials")
           .update(updateData)
-          .eq("id", material.id)
-          .select();
+          .eq("id", material.id);
 
-        if (error) throw error;
-        console.log("Update result:", data);
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(
+            () =>
+              reject(new Error("Update operation timed out after 10 seconds")),
+            10000
+          );
+        });
+
+        console.log("Executing update query...");
+        const { error } = (await Promise.race([
+          updatePromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
+
+        console.log("Update operation completed successfully");
+
+        // Separately fetch the updated record to confirm it was updated
+        const { data: updatedRecord, error: fetchError } = await supabase
+          .from("content_materials")
+          .select("*")
+          .eq("id", material.id)
+          .single();
+
+        if (fetchError) {
+          console.warn("Could not fetch updated record:", fetchError);
+        } else {
+          console.log("Updated record:", updatedRecord);
+        }
+
         alert("Materi berhasil diperbarui!");
       } else {
         // Create new material
@@ -165,12 +197,31 @@ function AdminContentPageContent() {
 
         console.log("Insert data:", insertData);
 
-        const { data, error } = await supabase
+        // Add timeout to prevent hanging
+        const insertPromise = supabase
           .from("content_materials")
           .insert(insertData)
           .select();
 
-        if (error) throw error;
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(
+            () =>
+              reject(new Error("Insert operation timed out after 10 seconds")),
+            10000
+          );
+        });
+
+        console.log("Executing insert query...");
+        const { data, error } = (await Promise.race([
+          insertPromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
+
         console.log("Insert result:", data);
         alert("Materi berhasil ditambahkan!");
       }
@@ -228,14 +279,51 @@ function AdminContentPageContent() {
 
         console.log("Video update data:", updateData);
 
-        const { data, error } = await supabase
+        // Add timeout to prevent hanging
+        const updatePromise = supabase
           .from("educational_videos")
           .update(updateData)
           .eq("id", video.id)
           .select();
 
-        if (error) throw error;
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(
+            () =>
+              reject(
+                new Error("Video update operation timed out after 10 seconds")
+              ),
+            10000
+          );
+        });
+
+        console.log("Executing video update query...");
+        const { data, error } = (await Promise.race([
+          updatePromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (error) {
+          console.error("Supabase video update error:", error);
+          throw error;
+        }
+
         console.log("Video update result:", data);
+
+        if (!data || data.length === 0) {
+          console.warn("Video update succeeded but no data returned");
+          // Check if the record actually exists
+          const { data: checkData, error: checkError } = await supabase
+            .from("educational_videos")
+            .select("*")
+            .eq("id", video.id);
+
+          console.log("Check after video update:", checkData);
+
+          if (checkError) {
+            console.error("Error checking updated video record:", checkError);
+          }
+        }
+
         alert("Video berhasil diperbarui!");
       } else {
         // Create new video
@@ -253,12 +341,33 @@ function AdminContentPageContent() {
 
         console.log("Video insert data:", insertData);
 
-        const { data, error } = await supabase
+        // Add timeout to prevent hanging
+        const insertPromise = supabase
           .from("educational_videos")
           .insert(insertData)
           .select();
 
-        if (error) throw error;
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(
+            () =>
+              reject(
+                new Error("Video insert operation timed out after 10 seconds")
+              ),
+            10000
+          );
+        });
+
+        console.log("Executing video insert query...");
+        const { data, error } = (await Promise.race([
+          insertPromise,
+          timeoutPromise,
+        ])) as any;
+
+        if (error) {
+          console.error("Supabase video insert error:", error);
+          throw error;
+        }
+
         console.log("Video insert result:", data);
         alert("Video berhasil ditambahkan!");
       }

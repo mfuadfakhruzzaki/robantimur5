@@ -95,6 +95,14 @@ function ProfileContent() {
   const router = useRouter();
   const supabase = createClient();
 
+  useEffect(() => {
+    if (user) {
+      fetchUserData();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
   // Show loading state
   if (loading) {
     return (
@@ -110,14 +118,6 @@ function ProfileContent() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (user) {
-      fetchUserData();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
 
   const fetchUserData = async () => {
     if (!user) return;
@@ -310,14 +310,6 @@ function ProfileContent() {
         return "Aktivitas";
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
-      </div>
-    );
-  }
 
   if (!profile) {
     return (

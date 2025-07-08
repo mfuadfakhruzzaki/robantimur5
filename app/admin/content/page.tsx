@@ -106,6 +106,8 @@ function AdminContentPageContent() {
     console.log("Save material called with:", material);
     console.log("Current user:", user);
     console.log("Is admin:", isAdmin);
+    console.log("Material has ID?", !!material.id);
+    console.log("Material ID:", material.id);
 
     if (!user) {
       alert("Error: User not authenticated");
@@ -116,26 +118,60 @@ function AdminContentPageContent() {
     try {
       if (material.id) {
         // Update existing material
-        console.log("Updating material with ID:", material.id);
-        const { error } = await supabase
+        console.log("UPDATING material with ID:", material.id);
+        const updateData = {
+          slug: material.slug,
+          title: material.title,
+          description: material.description,
+          content: material.content,
+          category: material.category,
+          read_time: material.read_time,
+          topics: material.topics,
+          video_url: material.video_url,
+          video_title: material.video_title,
+          video_description: material.video_description,
+          is_published: material.is_published,
+          updated_at: new Date().toISOString(),
+        };
+
+        console.log("Update data:", updateData);
+
+        const { data, error } = await supabase
           .from("content_materials")
-          .update({
-            ...material,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", material.id);
+          .update(updateData)
+          .eq("id", material.id)
+          .select();
 
         if (error) throw error;
+        console.log("Update result:", data);
         alert("Materi berhasil diperbarui!");
       } else {
         // Create new material
-        console.log("Creating new material");
-        const { error } = await supabase.from("content_materials").insert({
-          ...material,
+        console.log("CREATING new material");
+        const insertData = {
+          slug: material.slug,
+          title: material.title,
+          description: material.description,
+          content: material.content,
+          category: material.category,
+          read_time: material.read_time,
+          topics: material.topics,
+          video_url: material.video_url,
+          video_title: material.video_title,
+          video_description: material.video_description,
+          is_published: material.is_published,
           created_by: user.id,
-        });
+        };
+
+        console.log("Insert data:", insertData);
+
+        const { data, error } = await supabase
+          .from("content_materials")
+          .insert(insertData)
+          .select();
 
         if (error) throw error;
+        console.log("Insert result:", data);
         alert("Materi berhasil ditambahkan!");
       }
 
@@ -309,7 +345,13 @@ function AdminContentPageContent() {
           <TabsContent value="materials" className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">Materi Edukasi</h2>
-              <Button onClick={() => setShowNewMaterialForm(true)}>
+              <Button
+                onClick={() => {
+                  console.log("Tambah Materi clicked - resetting state");
+                  setEditingMaterial(null);
+                  setShowNewMaterialForm(true);
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Tambah Materi
               </Button>
@@ -448,9 +490,10 @@ function AdminContentPageContent() {
         {/* Material Edit/Create Form */}
         {(editingMaterial || showNewMaterialForm) && (
           <MaterialForm
-            material={editingMaterial}
+            material={editingMaterial} // null for new material, object for editing
             onSave={handleSaveMaterial}
             onCancel={() => {
+              console.log("Cancel clicked - resetting state");
               setEditingMaterial(null);
               setShowNewMaterialForm(false);
             }}
@@ -487,6 +530,9 @@ function MaterialForm({
   onCancel: () => void;
   saving: boolean;
 }) {
+  console.log("MaterialForm rendered with material:", material);
+  console.log("Is editing mode:", !!material);
+
   const [formData, setFormData] = useState({
     slug: material?.slug || "",
     title: material?.title || "",
@@ -520,15 +566,28 @@ function MaterialForm({
       return;
     }
 
+    // Prepare material data
     const materialData = {
-      ...material,
-      ...formData,
+      // Only include ID if we're editing existing material
+      ...(material?.id ? { id: material.id } : {}),
+      slug: formData.slug.trim(),
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      content: formData.content.trim(),
+      category: formData.category,
+      read_time: formData.read_time,
       topics: formData.topics
         .split(",")
         .map((t) => t.trim())
         .filter(Boolean),
+      video_url: formData.video_url.trim() || null,
+      video_title: formData.video_title.trim() || null,
+      video_description: formData.video_description.trim() || null,
+      is_published: formData.is_published,
     };
 
+    console.log("Form material prop:", material);
+    console.log("Is editing:", !!material?.id);
     console.log("Submitting material data:", materialData);
     onSave(materialData);
   };

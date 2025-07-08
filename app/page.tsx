@@ -1,10 +1,26 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, Users, Sparkles, MessageCircle, Trophy } from "lucide-react";
+import {
+  Heart,
+  Users,
+  Sparkles,
+  MessageCircle,
+  Trophy,
+  Menu,
+  X,
+} from "lucide-react";
 
 export default function HomePage() {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-50 to-blue-50">
       {/* Header */}
@@ -23,6 +39,8 @@ export default function HomePage() {
                 Ibu Sehat Roban
               </h1>
             </div>
+
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-6">
               <Link
                 href="/materi"
@@ -61,7 +79,69 @@ export default function HomePage() {
                 Profil
               </Link>
             </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={toggleMobileMenu}
+              className="md:hidden p-2 rounded-md text-gray-600 hover:text-pink-500 hover:bg-gray-100"
+            >
+              {isMobileMenuOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
+            </button>
           </div>
+
+          {/* Mobile Navigation */}
+          {isMobileMenuOpen && (
+            <nav className="md:hidden mt-4 pb-4 border-t border-gray-200">
+              <div className="flex flex-col space-y-2 pt-4">
+                <Link
+                  href="/materi"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Materi
+                </Link>
+                <Link
+                  href="/community"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Komunitas
+                </Link>
+                <Link
+                  href="/gamification"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Pencapaian
+                </Link>
+                <Link
+                  href="/chatbot"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Tanya AI
+                </Link>
+                <Link
+                  href="/kontak"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Kontak
+                </Link>
+                <Link
+                  href="/profile"
+                  className="text-gray-600 hover:text-pink-500 py-2 px-2 rounded-md hover:bg-gray-100"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Profil
+                </Link>
+              </div>
+            </nav>
+          )}
         </div>
       </header>
 
